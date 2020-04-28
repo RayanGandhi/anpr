@@ -1,14 +1,14 @@
 # USAGE
-# python yolo.py --image images/baggage_claim.jpg --yolo yolo-coco
-
-# import the necessary packages
+# python3 yolo.py --image images/baggage_claim.jpg --yolo yolo-coco
+#packages
 import numpy as np
 import argparse
 import time
 import cv2
 import os
+from PIL import Image 
 
-# construct the argument parse and parse the arguments
+# argument parser
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required=True,
 	help="path to input image")
@@ -20,7 +20,7 @@ ap.add_argument("-t", "--threshold", type=float, default=0.3,
 	help="threshold when applyong non-maxima suppression")
 args = vars(ap.parse_args())
 
-# load the COCO class labels our YOLO model was trained on
+# load the COCO class labels
 labelsPath = os.path.sep.join([args["yolo"], "coco.names"])
 LABELS = open(labelsPath).read().strip().split("\n")
 
@@ -29,15 +29,15 @@ np.random.seed(42)
 COLORS = np.random.randint(0, 255, size=(len(LABELS), 3),
 	dtype="uint8")
 
-# derive the paths to the YOLO weights and model configuration
+# YOLO weights and model configuration
 weightsPath = os.path.sep.join([args["yolo"], "yolov3.weights"])
 configPath = os.path.sep.join([args["yolo"], "yolov3.cfg"])
 
-# load our YOLO object detector trained on COCO dataset (80 classes)
+# load YOLO object detector trained on COCO dataset (80 classes)
 print("[INFO] loading YOLO from disk...")
 net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
 
-# load our input image and grab its spatial dimensions
+# load input image and grab its spatial dimensions
 image = cv2.imread(args["image"])
 (H, W) = image.shape[:2]
 
@@ -107,9 +107,9 @@ if len(idxs) > 0:
 		(x, y) = (boxes[i][0], boxes[i][1])
 		(w, h) = (boxes[i][2], boxes[i][3])
 		
-		new_img = image[y:y+h,x:x+w]
-		cv2.imwrite('./1.png',new_img)
-
+		#crop image and save
+		Image.open(args["image"]).crop((x, y, x+w, y+h)).save("new_img.jpg")
+		
 		# draw a bounding box rectangle and label on the image
 		color = [int(c) for c in COLORS[classIDs[i]]]
 		cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
